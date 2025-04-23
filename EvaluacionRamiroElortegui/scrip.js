@@ -2,11 +2,12 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+let animationId;
 let gameSpeed = 5;           // Velocidad constante (los cambios se harán en la modificación)
 let gravity = 0.5;           // Fuerza de gravedad
 let gameOver = false;
 let deathSound = new Audio("sound/metal-pipe-230698.mp3");
-let jumpSound = new Audio("salto.mp3"); // o "sounds/jump.mp3"
+let jumpSound = new Audio("salto.mp3");
 let score = 0;
 
 // Objeto dinosaurio
@@ -36,10 +37,11 @@ cactusImg.src = "img/cactus.png";  // Asegúrate de tener esta imagen en la ruta
 
 // Función principal del ciclo de juego
 function gameLoop() {
+    cancelAnimationFrame(animationId)
     if (!gameOver) {
         update();
         draw();
-        requestAnimationFrame(gameLoop);
+        animationId=requestAnimationFrame(gameLoop);
     }
 }
 
@@ -73,7 +75,7 @@ function update() {
     // Detección simple de colisiones (rectángulos)
     if (collision(dino, obstacle)) {
         gameOver = true;
-        deathSound.play(); // <- reproducir sonido
+        deathSound.play();
         document.getElementById("restartBtn").style.display = "block";
     }
 }
@@ -140,3 +142,24 @@ document.getElementById("restartBtn").addEventListener("click", function() {
 window.onload = function() {
     gameLoop();
 };
+document.getElementById("manualBoton").addEventListener("click", function () {
+   cancelAnimationFrame(animationId)
+    // Reinicia los valores del juego
+    gameOver = false;
+    score = 0;
+    gameSpeed = 5;
+    
+    // Reinicia el estado del dinosaurio
+    dino.y = canvas.height - dino.height;
+    dino.isJumping = false;
+    dino.vy = 0;
+
+    // Reposiciona el obstáculo
+    obstacle.x = canvas.width;
+
+    // Oculta el botón de reinicio por si estaba visible
+    document.getElementById("restartBtn").style.display = "none";
+
+    // Vuelve a arrancar el juego
+    gameLoop();
+});
